@@ -246,7 +246,7 @@
       
       window.requestAnimationFrame(() => {
         VANTA({
-          el: "#hero",
+          el: "#hero-background",
           mouseControls: false,
           touchControls: false,
           minHeight: 200.0,
@@ -259,12 +259,11 @@
           backgroundColor: "#fff",
           color: "#283870",
         });
-      });
 
-      window.requestAnimationFrame(() => {
-        document.getElementById("hero-background").style.opacity = "1";
-      })
-      
+        window.requestAnimationFrame(() => {
+          document.getElementById("hero-background").style.opacity = "1";
+        })
+      });
 
       isScrolling = null;
       initialized = true;

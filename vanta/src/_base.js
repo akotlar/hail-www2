@@ -36,7 +36,7 @@ VANTA.VantaBase = class VantaBase {
     this.resize = this.resize.bind(this)
     this.animationLoop = this.animationLoop.bind(this)
 
-    this.options =  Object.assign({
+    this.options = Object.assign({
       mouseControls: true,
       touchControls: true,
       minHeight: 200,
@@ -44,21 +44,45 @@ VANTA.VantaBase = class VantaBase {
       scale: 1,
       scaleMobile: 1
     }, this.defaultOptions || {}, userOptions);
-    
-    this.el = this.options.el
-    if (this.el == null) {
-      error("Instance needs \"el\" param!")
-    } else if (!(this.options.el instanceof HTMLElement)) {
-      const selector = this.el
-      this.el = document.querySelector(selector)
-      if (!this.el) {
-        error("Cannot find element", selector)
-        return
-      }
+
+    this.el = document.querySelector(this.options.el);
+    if (!this.el) {
+      console.fatal(`Cannot find ${this.options.el}`)
+      return;
     }
 
-    this.prepareEl()
-    this.initThree()
+    this.elOnscreen = false;
+
+    this.prepareEl();
+
+    if (!THREE.WebGLRenderer) {
+      console.warn("[VANTA] No THREE defined on window")
+      return
+    }
+    // Set renderer
+    this.renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true
+    })
+
+    this.el.appendChild(this.renderer.domElement)
+
+    this.renderer.domElement.id = 'vanta-canvas';
+
+    this.applyCanvasStyles(this.renderer.domElement)
+    this.scene = new THREE.Scene()
+    this.elOnscreen = true;
+    const intersectionCallback = (entries) => {
+      if (entries.length > 1) {
+        console.error("should be observing a single element");
+      }
+      this.elOnscreen = entries[0].isIntersecting;
+    };
+
+    let observer = new IntersectionObserver(intersectionCallback, { threshold: .25 });
+    let target = document.getElementById('vanta-canvas');
+    observer.observe(target);
+
     this.setSize()
 
     try {
@@ -88,33 +112,33 @@ VANTA.VantaBase = class VantaBase {
   }
 
   prepareEl() {
-      let i, child
-      // wrapInner for text nodes
-      if (typeof Node !== 'undefined' && Node.TEXT_NODE) {
-        for (i = 0; i < this.el.childNodes.length; i++) {
-          const n = this.el.childNodes[i]
-          if (n.nodeType === Node.TEXT_NODE) {
-            const s = document.createElement('span')
-            s.textContent = n.textContent
-            n.parentElement.insertBefore(s, n)
-            n.remove()
-          }
+    let i, child
+    // wrapInner for text nodes
+    if (typeof Node !== 'undefined' && Node.TEXT_NODE) {
+      for (i = 0; i < this.el.childNodes.length; i++) {
+        const n = this.el.childNodes[i]
+        if (n.nodeType === Node.TEXT_NODE) {
+          const s = document.createElement('span')
+          s.textContent = n.textContent
+          n.parentElement.insertBefore(s, n)
+          n.remove()
         }
       }
-      // Set foreground elements
-      for (i = 0; i < this.el.children.length; i++) {
-        child = this.el.children[i]
-        if (getComputedStyle(child).position === 'static') {
-          child.style.position = 'relative'
-        }
-        if (getComputedStyle(child).zIndex === 'auto') {
-          child.style.zIndex = 1
-        }
+    }
+    // Set foreground elements
+    for (i = 0; i < this.el.children.length; i++) {
+      child = this.el.children[i]
+      if (getComputedStyle(child).position === 'static') {
+        child.style.position = 'relative'
       }
-      // Set canvas and container style
-      if (getComputedStyle(this.el).position === 'static') {
-        this.el.style.position = 'relative'
+      if (getComputedStyle(child).zIndex === 'auto') {
+        child.style.zIndex = 1
       }
+    }
+    // Set canvas and container style
+    if (getComputedStyle(this.el).position === 'static') {
+      this.el.style.position = 'relative'
+    }
   }
 
   applyCanvasStyles(canvasEl, opts = {}) {
@@ -126,26 +150,6 @@ VANTA.VantaBase = class VantaBase {
       background: ''
     });
     Object.assign(canvasEl.style, opts);
-    canvasEl.id = 'vanta-canvas';
-  }
-
-  initThree() {
-    if (!THREE.WebGLRenderer) {
-      console.warn("[VANTA] No THREE defined on window")
-      return
-    }
-    // Set renderer
-    this.renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true
-    })
-    
-      this.el.appendChild(this.renderer.domElement)
-      this.applyCanvasStyles(this.renderer.domElement)
-      if (isNaN(this.options.backgroundAlpha)) {
-        this.options.backgroundAlpha = 1
-      }
-      this.scene = new THREE.Scene()
   }
 
   getCanvasElement() {
@@ -159,7 +163,7 @@ VANTA.VantaBase = class VantaBase {
 
   setSize() {
     this.scale || (this.scale = 1)
-    if (mobileCheck() && this.options.scaleMobile) {
+    if (this.options.scaleMobile && mobileCheck()) {
       this.scale = this.options.scaleMobile
     } else if (this.options.scale) {
       this.scale = this.options.scale
@@ -184,25 +188,12 @@ VANTA.VantaBase = class VantaBase {
     typeof this.onResize === "function" ? this.onResize() : void 0
   }
 
-  // TOOD: fix this by using intersection observer
-  isOnScreen() {
-    const elHeight = this.el.offsetHeight
-    const elRect = this.el.getBoundingClientRect()
-    const scrollTop = (window.pageYOffset ||
-      (document.documentElement || document.body.parentNode || document.body).scrollTop
-    )
-    const offsetTop = elRect.top + scrollTop
-    const minScrollTop = offsetTop - window.innerHeight
-    const maxScrollTop = offsetTop + elHeight
-    return minScrollTop <= scrollTop && scrollTop <= maxScrollTop
-  }
-
   animationLoop() {
     const now = Date.now();
     const delta = now - this.then;
 
-    if (!isScrolling || !this.postInit) {
-      if (this.options.forceAnimate || (delta > this.interval && this.isOnScreen())) {
+    if (this.elOnscreen && (!isScrolling || !this.postInit)) {
+      if (this.options.forceAnimate || (delta > this.interval)) {
         if (typeof this.onUpdate === "function") {
           this.onUpdate()
         }
@@ -216,7 +207,7 @@ VANTA.VantaBase = class VantaBase {
     }
 
     this.then = now - (delta % this.interval);
-    return this.req = window.setTimeout(this.animationLoop, this.postInit ? 24 : 0)
+    return this.req = window.setTimeout(this.animationLoop, !this.elOnscreen ? 1000 : (this.postInit ? 24 : 0))
   }
 
   destroy() {

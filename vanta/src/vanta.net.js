@@ -44,6 +44,10 @@ class Effect extends VantaBase {
 
   // TODO: need to dot his r elative t o t he #hero container
   onMouseMove2(event) {
+    if(!this.elOnscreen) {
+      return;
+    }
+
     if (!this.mouse.ran) {
       this.mouse.ran = true;
       return;
@@ -52,13 +56,6 @@ class Effect extends VantaBase {
     if (!this.rayCaster) {
       this.rayCaster = new THREE.Raycaster()
     }
-    // const el = window.getElementById("vanta-canvas")
-    const rect = this.el.getBoundingClientRect();
-    // console.info('rect',rect, rect.height - rect.y, event.pageY, rect.height - rect.top - rect.bottom);
-    if (rect.bottom <= 0) {
-      // console.info("outside bounds");
-      return;
-    }
 
     // const off = rect.height - rect.top - rect.bottom;
 
@@ -66,8 +63,6 @@ class Effect extends VantaBase {
     //   console.info("mouse off element");
     //   return;
     // }
-
-
 
     // console.info("offset", event.offsetY, event.clientY, event.pageY, this.height);
 
