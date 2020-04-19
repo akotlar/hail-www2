@@ -1,0 +1,613 @@
+/* https://gist.githubusercontent.com/killercup/5917178/raw/40840de5352083adb2693dc742e9f75dbb18650f/pandoc.css */
+
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&display=swap'); */
+
+html {
+  font-size: 100%;
+  overflow-y: scroll;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  /* font-family: 'Open Sans', sans-serif; */
+
+  /* font-family: 'Roboto', sans-serif; */
+  /* font-family: "Lato","proxima-nova","Helvetica Neue",Arial,sans-serif; */
+  /* font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif; */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 16px;
+}
+
+.callout {
+  padding: 1rem;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+  margin: 1rem 0px;
+}
+
+.callout p:last-child {
+  margin-bottom: 0px;
+}
+
+body {
+  margin: 0px;
+}
+
+#body {
+  color: #444;
+  line-height: 1.6;
+  margin: auto;
+  border-color: #ddd;
+}
+
+a, a code {
+  color: #444;
+  text-decoration: none;
+}
+
+a:hover, a:hover code {
+  color: #283870;
+  text-decoration-color: #283870;
+  text-decoration: underline;
+}
+
+*::-moz-selection {
+  background: rgba(255, 255, 0, 0.3);
+  color: #000;
+}
+
+*::selection {
+  background: rgba(255, 255, 0, 0.3);
+  color: #000;
+}
+
+a::-moz-selection {
+  background: rgba(255, 255, 0, 0.3);
+  color: #0645ad;
+}
+
+a::selection {
+  background: rgba(255, 255, 0, 0.3);
+  color: #0645ad;
+}
+
+p {
+  margin: 1em 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #111;
+  line-height: 125%;
+  font-weight: normal;
+}
+
+h4, h5, h6 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2.5em;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+h4 {
+  font-size: 1.2em;
+}
+
+h5 {
+  font-size: 1em;
+}
+
+h6 {
+  font-size: 0.9em;
+}
+
+code, samp, kbd {
+  color: #000;
+  font-family: monospace, monospace;
+  _font-family: 'courier new', monospace;
+  padding: .15625em .25em;
+  /* 5/32, 1/4 */
+}
+
+b, strong {
+  font-weight: bold;
+}
+
+dfn {
+  font-style: italic;
+}
+
+ins {
+  background: #ff9;
+  color: #000;
+  text-decoration: none;
+}
+
+mark {
+  background: #ff0;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+
+sub, sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+ul, ol {
+  margin: 1em 0;
+  padding: 0 0 0 2em;
+}
+
+li p:last-child {
+  margin-bottom: 0;
+}
+
+ul ul, ol ol {
+  margin: 0 0;
+}
+
+dl {
+  margin-bottom: 1em;
+}
+
+dt {
+  font-weight: bold;
+  margin-bottom: .8em;
+}
+
+dd {
+  margin: 0 0 .8em 2em;
+}
+
+dd:last-child {
+  margin-bottom: 0;
+}
+
+img {
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+  vertical-align: middle;
+}
+
+figure {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+figure img {
+  border: none;
+  margin: 0 auto;
+}
+
+figcaption {
+  font-size: 0.8em;
+  font-style: italic;
+  margin: 0 0 .8em;
+}
+
+table {
+  margin-bottom: 2em;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+  border-color: inherit;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+table th {
+  padding: .2em 1em;
+  background-color: #eee;
+  border-top: 1px solid;
+  border-left: 1px solid;
+  border-color: inherit;
+}
+
+table td {
+  padding: .2em 1em;
+  border-top: 1px solid;
+  border-left: 1px solid;
+  border-color: inherit;
+  vertical-align: top;
+}
+
+.author {
+  font-size: 1.2em;
+  text-align: center;
+}
+
+@media only screen and (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    filter: none !important;
+    -ms-filter: none !important;
+  }
+  body {
+    font-size: 12pt;
+  }
+  #body {
+    max-width: 100%;
+  }
+  a, a:visited {
+    text-decoration: underline;
+  }
+  hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: inherit;
+    margin: 1em 0;
+    padding: 0;
+  }
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+  abbr[title]:after {
+    content: " (" attr(title) ")";
+  }
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after {
+    content: "";
+  }
+  tr, img {
+    page-break-inside: avoid;
+  }
+  img {
+    max-width: 100% !important;
+  }
+  @page :left {
+    margin: 15mm 20mm 15mm 10mm;
+  }
+  @page :right {
+    margin: 15mm 10mm 15mm 20mm;
+  }
+  p, h2, h3 {
+    orphans: 3;
+    widows: 3;
+  }
+  h2, h3 {
+    page-break-after: avoid;
+  }
+}
+
+#banner:visited {
+  text-decoration: none;
+}
+
+#banner:hover {
+  text-decoration: none;
+}
+
+.sourceCode {
+  border-color: inherit;
+}
+
+pre, code {
+  background-color: #f5f5f5;
+}
+
+pre, blockquote {
+  border: 1px solid;
+  border-color: inherit;
+  padding-right: 1em;
+  page-break-inside: avoid;
+}
+
+code {
+  white-space: pre-wrap;
+  padding: 3px;
+  border-radius: 4px;
+}
+
+pre {
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.42857143;
+  color: #444;
+  word-break: break-all;
+  word-wrap: break-word;
+  border-radius: 4px;
+}
+
+pre code {
+  padding: 0;
+}
+
+.myButton {
+  box-shadow: 0px 0px 14px -3px #276873;
+  background-color: #283891;
+  border-radius: 18px;
+  border: 3px solid #283870;
+  display: inline-block;
+  cursor: pointer;
+  cursor: hand;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 5px 40px;
+  padding: 15px 11px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: -1px 0px 0px #3d768a;
+  transition-duration: 0.4s;
+  width: 250px;
+}
+
+.myButton:hover {
+  color: white;
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+  text-decoration: none;
+}
+
+.myButton:active {
+  position: relative;
+  top: 1px;
+  text-decoration: none;
+}
+
+.myButton:visited {
+  color: white;
+}
+
+/*new stuff*/
+#vanta-canvas {
+  opacity: .125; /*doesn't seem to work in chrome anymore...*/
+}
+
+@keyframes in {
+  0% {
+    letter-spacing: -12px;
+    opacity: 0;
+  }
+  100% {
+    letter-spacing: 4px;
+    opacity: 1;
+  }
+}
+
+@keyframes in2 {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.grid-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.grid-item {
+  width: 200px;
+  padding: 0px 10px;
+}
+
+:root {
+  --default-padding: 16px;
+  --header-height: 80px;
+}
+
+.sticky {
+  position: sticky;
+  top: 0px;
+  /* adjust sentinel height/positioning based on this position. */
+  height: var(--header-height);
+  padding: 0 var(--default-padding);
+  z-index: 999;
+}
+
+.sticky_sentinel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* needs dimensions */
+  visibility: hidden;
+}
+
+.sticky_sentinel--top {
+  /* Adjust the height and top values based on your on your sticky top position.
+e.g. make the height bigger and adjust the top so observeHeaders()'s
+IntersectionObserver fires as soon as the bottom of the sentinel crosses the
+top of the intersection container. */
+  height: 40px;
+  top: -24px;
+}
+
+.sticky_sentinel--bottom {
+  /* Height should match the top of the header when it's at the bottom of the
+intersection container. */
+  height: calc(var(--header-height) + var(--default-padding));
+  bottom: 0;
+}
+
+#hero-background {
+  opacity: 0;
+  height: calc(100% - 50px);
+  position: absolute;
+  width: 100%;
+  /* background-image: url("./vanta-bg-4.png");
+  background-position: center;
+  background-repeat: no-repeat; */
+  transition: opacity 1000ms ease-in-out;
+  z-index:1;
+}
+
+#hero-button-container {
+  display: flex;
+  width: 300px;
+  margin-top: 50px;
+  justify-content: space-between;
+}
+
+.button {
+  background-color: #fff;
+  border: 2px solid #444;
+  border-radius: 50px;
+  padding: 10px 20px;
+}
+
+.button:hover {
+  background-color: #283870;
+  border-color: #283870;
+  border-radius: 50px;
+  text-decoration: none;
+  /* transition:cubic-bezier(0.6, -0.28, 0.735, 0.045) */
+  color: #ffff;
+}
+
+.button:focus {
+  outline: none;
+}
+
+/*rgba(40, 56, 112, 0.3); is 283870 with opacity .3*/
+
+.about {
+  display: flex;
+  flex-direction: column;
+  padding: 50px 0 75px 0;
+  border-bottom: 2px solid #444;
+}
+
+.about-content {
+  padding: 0px 50px;
+  flex-direction: column;
+  display: flex;
+}
+
+.about-content p:first-child {
+  margin-top: 0px;
+}
+
+.about-content p:last-child {
+  /* padding: 0px; */
+  margin-bottom: 0px;
+}
+
+.about a {
+  font-weight: 500;
+}
+
+.about.dark {
+  /* border: 50px solid rgba(255, 255, 255, .5);; */
+  color: #fff;
+  background-color: rgba(40, 56, 112, 0.95);
+  border: none;
+}
+
+.header-wrap {
+  align-self: center;
+  position: relative;
+  margin-bottom: 75px;
+}
+
+.header-wrap:after {
+  margin: auto;
+  content: "";
+  position: absolute;
+  width: 100px;
+  bottom: -10px;
+  height: 2px;
+  left: calc(50% - 50px);
+  background: #444;
+}
+
+.header-wrap h1 {
+  font-weight: 500;
+}
+
+.about.dark h1 {
+  color: #fff;
+}
+
+
+
+.dark .header-wrap:after {
+  background: #fff;
+}
+
+.about.dark a {
+  color: #fff;
+}
+
+/*name because f*** bootstrap has a .rounded*/
+
+img.rounded-image {
+  background-color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 10px;
+}
+
+#logo-title {
+  font-size: 96px;
+  color: #2a3a8c;
+  letter-spacing: -12px;
+  animation: ease-in 0.25s in;
+  animation-fill-mode: forwards;
+  background: #fff;
+  margin: 0;
+  font-weight: 500;
+
+  /*new parts*/
+  line-height: 1;
+  padding-bottom: 18px;
+  /* padding-bottom: 33px;
+  line-height: 65px; */
+  margin-top: 15px;
+}
+
+#logo-subtitle {
+  background: #fff;
+  font-size: 18px;
+  animation: ease-in 0.3s in2;
+  animation-delay: 0.06s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+
+  /*new parts*/
+  line-height: 1;
+}
+
+#hero-content {
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  align-items: center;
+  padding: 10px;
+  background: #fff;
+  box-shadow: 0px 0px 25px 10px rgba(255,255,255, 1);
+}
