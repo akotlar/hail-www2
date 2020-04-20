@@ -1,4 +1,5 @@
 /* Original base styles generated from Bootstrap 3.3.7 and normalize.css */
+
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
@@ -9,11 +10,13 @@
  * Generated using the Bootstrap Customizer (http://getbootstrap.com/customize/?id=b1a7a9799f5a13719dc42620cfa43461)
  * Config saved to config.json and https://gist.github.com/b1a7a9799f5a13719dc42620cfa43461
  */
+
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
+
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 
 #hail-navbar {
@@ -47,6 +50,7 @@
   justify-content: flex-end;
   display: flex;
 }
+
 #hail-navbar #hail-navbar-collapse {
   flex-direction: row;
   flex: 1;
@@ -54,15 +58,15 @@
 }
 
 #hail-navbar-brand {
-  line-height: 1;
-  margin-top:-7px;
+  margin-top: -8px;
 }
 
 #hail-navbar a {
   color: #444;
   text-decoration: none;
   outline: none;
-  background: inherit; /*defeat bootstrap focus background*/
+  background: inherit;
+  /*defeat bootstrap focus background*/
   text-transform: uppercase;
   font-family: inherit;
 }
@@ -74,7 +78,6 @@
 
 #hail-navbar #hail-menu .nav-item {
   padding: 0px 0.875rem 0px 0.875rem;
-  line-height: 1;
 }
 
 #hail-navbar #hail-menu .nav-item:last-child {
@@ -89,7 +92,6 @@
   #hail-navbar #hail-navbar-header {
     width: 100%;
   }
-
   #hail-navbar #hail-navbar-collapse {
     display: none;
     flex-direction: column;
@@ -105,20 +107,16 @@
     margin-top: 1px;
     border-radius: 4px;
   }
-
   #hail-navbar #hail-navbar-collapse .nav-item {
     padding: 0.875rem;
     display: block;
   }
-  
   #hail-navbar #hail-navbar-collapse .nav-item:first-child {
     padding-top: 1.5rem;
   }
-
   #hail-navbar #hail-navbar-collapse .nav-item:last-child {
     padding-bottom: 1.5rem;
   }
-
   #hail-navbar #hail-menu {
     margin-top: 0px;
     flex-direction: column;
@@ -127,7 +125,7 @@
 }
 
 #hail-navbar img#logo {
-  height: 17px;
+  height: 20px;
   border: 0;
 }
 
@@ -135,14 +133,14 @@
   outline: 0;
 }
 
-#hail-navbar .dropdown-menu > li > a {
+#hail-navbar .dropdown-menu>li>a {
   padding: 0.75rem;
   line-height: 1;
   white-space: nowrap;
   text-decoration: none;
 }
-#hail-navbar .dropdown-menu > li > a:hover,
-#hail-navbar .dropdown-menu > li > a:focus {
+
+#hail-navbar .dropdown-menu>li>a:hover, #hail-navbar .dropdown-menu>li>a:focus {
   color: #262626;
   background-color: #fff;
 }
@@ -151,6 +149,7 @@
   left: 0;
   right: auto;
 }
+
 #hail-navbar .dropdown-header {
   display: block;
   padding: 3px 20px;
@@ -158,6 +157,7 @@
   color: #777777;
   white-space: nowrap;
 }
+
 @media (min-width: 768px) {
   #hail-navbar #hail-navbar-collapse {
     display: block!important;
@@ -171,14 +171,14 @@
     right: auto;
   }
 }
+
 #hail-navbar .nav {
   margin-bottom: 0;
   padding-left: 0;
   list-style: none;
 }
 
-#hail-navbar .nav > li > a:hover,
-#hail-navbar .nav > li > a:focus {
+#hail-navbar .nav>li>a:hover, #hail-navbar .nav>li>a:focus {
   background-color: inherit;
 }
 
@@ -220,12 +220,12 @@
   border: 0px;
 }
 
-#hail-navbar #hail-navbar-collapse.show .navbar-nav > li > .dropdown-menu li {
+#hail-navbar #hail-navbar-collapse.show .navbar-nav>li>.dropdown-menu li {
   margin-left: 0.875rem;
 }
 
 @media (min-width: 768px) {
-  #hail-navbar .navbar-nav > li > .dropdown-menu {
+  #hail-navbar .navbar-nav>li>.dropdown-menu {
     position: absolute;
     top: 100%;
     left: auto;
@@ -262,17 +262,18 @@
   border: 1px solid #444;
 }
 
-#hail-navbar #hail-container-fluid .navbar-toggler:hover,
-#hail-navbar #hail-container-fluid .navbar-toggler:focus {
+#hail-navbar #hail-container-fluid .navbar-toggler:hover, #hail-navbar #hail-container-fluid .navbar-toggler:focus {
   outline: none;
 }
-#hail-navbar #hail-container-fluid .navbar-toggler:hover .icon-bar,
-#hail-navbar #hail-container-fluid .navbar-toggler:focus .icon-bar {
+
+#hail-navbar #hail-container-fluid .navbar-toggler:hover .icon-bar, #hail-navbar #hail-container-fluid .navbar-toggler:focus .icon-bar {
   border-color: #111;
 }
+
 #hail-navbar #hail-container-fluid .navbar-toggler .icon-bar {
   background-color: #444;
 }
+
 @media (min-width: 768px) {
   #hail-navbar #hail-container-fluid .navbar-toggler {
     display: none;
