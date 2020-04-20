@@ -72,14 +72,18 @@ VANTA.VantaBase = class VantaBase {
     this.applyCanvasStyles(this.renderer.domElement)
     this.scene = new THREE.Scene()
     this.elOnscreen = true;
+
+    const intersectionThreshold = 0.25;
     const intersectionCallback = (entries) => {
       if (entries.length > 1) {
         console.error("should be observing a single element");
       }
-      this.elOnscreen = entries[0].isIntersecting;
+
+      // entries[0].isIntersecting incorrect in firefox
+      this.elOnscreen = entries[0].intersectionRatio > intersectionThreshold;
     };
 
-    let observer = new IntersectionObserver(intersectionCallback, { threshold: .25 });
+    let observer = new IntersectionObserver(intersectionCallback, { threshold: intersectionThreshold });
     let target = document.getElementById('vanta-canvas');
     observer.observe(target);
 
@@ -168,6 +172,7 @@ VANTA.VantaBase = class VantaBase {
     } else if (this.options.scale) {
       this.scale = this.options.scale
     }
+
     this.width = Math.max(this.el.offsetWidth, this.options.minWidth)
     this.height = Math.max(this.el.offsetHeight, this.options.minHeight)
   }

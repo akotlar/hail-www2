@@ -29,6 +29,8 @@ class Effect extends VantaBase {
     this.colorB = getBrightness(new THREE.Color(this.options.color))
     this.bgB = getBrightness(new THREE.Color(this.options.backgroundColor));
 
+    this.elOffset = this.el.offsetTop;
+    console.info('this.elOffset', this.elOffset);
     let timeout;
     window.addEventListener('mousemove', (e) => {
       if (timeout) {
@@ -43,8 +45,8 @@ class Effect extends VantaBase {
   }
 
   // TODO: need to dot his r elative t o t he #hero container
-  onMouseMove2(event) {
-    if(!this.elOnscreen) {
+  onMouseMove2(e) {
+    if (!this.elOnscreen) {
       return;
     }
 
@@ -57,26 +59,12 @@ class Effect extends VantaBase {
       this.rayCaster = new THREE.Raycaster()
     }
 
-    // const off = rect.height - rect.top - rect.bottom;
+    const ox = e.pageX;
+    const oy = e.pageY - this.elOffset;
+    const x = (ox / this.width) * 2 - 1;
 
-    // if(rect.top < 0 && (rect.height - rect.top - rect.bottom) < event.pageY) {
-    //   console.info("mouse off element");
-    //   return;
-    // }
+    const y = - (oy / this.height) * 2 + 1;
 
-    // console.info("offset", event.offsetY, event.clientY, event.pageY, this.height);
-
-    // calculate mouse position in normalized device coordinates
-    // (-1 to +1) for both components
-    // console.info("this.el.offsetHeight", this.el)
-    // const x = ( event.clientX / this.el.offsetWidth ) * 2 - 1;
-    // const y =  -( (event.clientY) / (offset + 100) ) * 2 + 1;
-    const x = (event.offsetX / this.width) * 2 - 1;
-
-    const y = - (event.offsetY / (this.height)) * 2 + 1;
-    // console.info("x,y",x,y, event.clientX, event.offsetX);
-    this.mouse.rawY = event.clientY;
-    // console.info("x,y",x,y);
     if (x !== this.mouse.x || y !== this.mouse.y) {
       this.mouse.x = x;
       this.mouse.y = y;
@@ -179,14 +167,11 @@ class Effect extends VantaBase {
       p = this.points[i]
 
       if (this.rayCaster && this.mouse.updated) {
-        distToMouse = this.rayCaster.ray.distanceToPoint(p.position);
-
-        distToMouse = (12 - distToMouse) * 0.25;
-        // console.info("distToMouse", distToMouse)
+        distToMouse = (12 - this.rayCaster.ray.distanceToPoint(p.position)) * 0.25;
         if (distToMouse < 1) {
           p.scale.x = p.scale.y = p.scale.z = 1;
-        } else if (distToMouse > 2) {
-          p.scale.x = p.scale.y = p.scale.z = 2;
+        } else if (distToMouse > 1.25) {
+          p.scale.x = p.scale.y = p.scale.z = 1.25;
         } else {
           p.scale.x = p.scale.y = p.scale.z = distToMouse;
         }
