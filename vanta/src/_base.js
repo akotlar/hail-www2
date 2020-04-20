@@ -99,12 +99,10 @@ VANTA.VantaBase = class VantaBase {
     this.interval = 1000 / 16;
     this.postInit = false
 
-    this.resize()
-    this.animationLoop()
-
     window.addEventListener('resize', this.resize)
-    window.requestAnimationFrame(() => this.resize(true)) // Force a resize after the first frame
     window.addEventListener('scroll', scrollingListener);
+    window.requestAnimationFrame(() => this.resize(true))
+    window.requestAnimationFrame(() => this.animationLoop())
 
     this.postInit = true;
   }
@@ -177,7 +175,7 @@ VANTA.VantaBase = class VantaBase {
     const delta = now - this.then;
 
     if (this.elOnscreen && (!isScrolling || !this.postInit)) {
-      if (this.options.forceAnimate || (delta > this.interval)) {
+      if (delta > this.interval) {
         if (typeof this.onUpdate === "function") {
           this.onUpdate()
         }
