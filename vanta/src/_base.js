@@ -37,10 +37,6 @@ VANTA.VantaBase = class VantaBase {
     this.animationLoop = this.animationLoop.bind(this)
 
     this.options = Object.assign({
-      mouseControls: true,
-      touchControls: true,
-      minHeight: 200,
-      minWidth: 200,
       scale: 1,
       scaleMobile: 1
     }, this.defaultOptions || {}, userOptions);
@@ -86,8 +82,6 @@ VANTA.VantaBase = class VantaBase {
     let observer = new IntersectionObserver(intersectionCallback, { threshold: intersectionThreshold });
     let target = document.getElementById('vanta-canvas');
     observer.observe(target);
-
-    this.setSize()
 
     try {
       this.init()
@@ -165,32 +159,17 @@ VANTA.VantaBase = class VantaBase {
     }
   }
 
-  setSize() {
-    this.scale || (this.scale = 1)
-    if (this.options.scaleMobile && mobileCheck()) {
-      this.scale = this.options.scaleMobile
-    } else if (this.options.scale) {
-      this.scale = this.options.scale
-    }
-
-    this.width = Math.max(this.el.offsetWidth, this.options.minWidth)
-    this.height = Math.max(this.el.offsetHeight, this.options.minHeight)
-  }
-
-
   resize() {
-    this.setSize()
     if (this.camera) {
-      this.camera.aspect = this.width / this.height
+      this.camera.aspect = this.el.offsetWidth / this.el.offsetHeight
       if (typeof this.camera.updateProjectionMatrix === "function") {
         this.camera.updateProjectionMatrix()
       }
     }
     if (this.renderer) {
-      this.renderer.setSize(this.width, this.height)
-      this.renderer.setPixelRatio(window.devicePixelRatio / this.scale)
+      this.renderer.setSize(this.el.offsetWidth, this.el.offsetHeight)
+      this.renderer.setPixelRatio(window.devicePixelRatio)
     }
-    typeof this.onResize === "function" ? this.onResize() : void 0
   }
 
   animationLoop() {
@@ -213,24 +192,6 @@ VANTA.VantaBase = class VantaBase {
 
     this.then = now - (delta % this.interval);
     return this.req = window.setTimeout(this.animationLoop, !this.elOnscreen ? 1000 : (this.postInit ? 24 : 0))
-  }
-
-  destroy() {
-    if (typeof this.onDestroy === "function") {
-      this.onDestroy()
-    }
-    const rm = window.removeEventListener
-    rm('resize', this.resize)
-    rm('scroll', scrollingListener);
-
-    window.cancelAnimationFrame(this.req)
-    if (this.renderer) {
-      if (this.renderer.domElement) {
-        this.el.removeChild(this.renderer.domElement)
-      }
-      this.renderer = null
-      this.scene = null
-    }
   }
 }
 

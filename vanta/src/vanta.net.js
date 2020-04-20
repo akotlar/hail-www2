@@ -61,9 +61,9 @@ class Effect extends VantaBase {
 
     const ox = e.pageX;
     const oy = e.pageY - this.elOffset;
-    const x = (ox / this.width) * 2 - 1;
+    const x = (ox / this.el.offsetWidth) * 2 - 1;
 
-    const y = - (oy / this.height) * 2 + 1;
+    const y = - (oy / this.el.offsetHeight) * 2 + 1;
 
     if (x !== this.mouse.x || y !== this.mouse.y) {
       this.mouse.x = x;
@@ -145,7 +145,7 @@ class Effect extends VantaBase {
     // PerspectiveCamera( fov, aspect, near, far )
     this.camera = new THREE.PerspectiveCamera(
       25,
-      this.width / (this.height),
+      this.el.offsetWidth / (this.el.offsetHeight),
       .01, 10000)
     this.camera.position.set(50, 100, 150)
     this.scene.add(this.camera)
