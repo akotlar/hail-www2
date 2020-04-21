@@ -41,34 +41,44 @@ VANTA.VantaBase = class VantaBase {
       scaleMobile: 1
     }, this.defaultOptions || {}, userOptions);
 
+    this.options.color = new THREE.Color(this.options.color)
+    this.options.backgroundColor = new THREE.Color(this.options.backgroundColor)
     this.el = document.querySelector(this.options.el);
+    this.elOnscreen = false;
+
     if (!this.el) {
       console.fatal(`Cannot find ${this.options.el}`)
       return;
     }
 
-    this.elOnscreen = false;
+    window.requestAnimationFrame(() => this.prepareEl());
 
-    this.prepareEl();
+    window.requestAnimationFrame(() => {
+      if (!THREE.WebGLRenderer) {
+        console.warn("[VANTA] No THREE defined on window")
+        return
+      }
+      // Set renderer
+      this.renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true
+      })
 
-    if (!THREE.WebGLRenderer) {
-      console.warn("[VANTA] No THREE defined on window")
-      return
-    }
-    // Set renderer
-    this.renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true
+      this.el.appendChild(this.renderer.domElement)
+
+      this.renderer.domElement.id = 'vanta-canvas';
+    });
+
+    window.requestAnimationFrame(() => {
+      this.applyCanvasStyles(this.renderer.domElement)
     })
 
-    this.el.appendChild(this.renderer.domElement)
+    window.requestAnimationFrame(() => {
+      this.scene = new THREE.Scene()
+      this.elOnscreen = true;
+    })
 
-    this.renderer.domElement.id = 'vanta-canvas';
-
-    this.applyCanvasStyles(this.renderer.domElement)
-    this.scene = new THREE.Scene()
-    this.elOnscreen = true;
-
+    this.postInit = false
     const intersectionThreshold = 0.25;
     const intersectionCallback = (entries) => {
       if (entries.length > 1) {
@@ -77,34 +87,40 @@ VANTA.VantaBase = class VantaBase {
 
       // entries[0].isIntersecting incorrect in firefox
       this.elOnscreen = entries[0].intersectionRatio > intersectionThreshold;
+      this.interval = 1000 / 16;
+      if (this.elOnscreen && this.postInit == false) {
+        try {
+          window.requestAnimationFrame(() => {
+            this.init();
+            this.postInit = true;
+            this.then = Date.now();
+          });
+
+          window.requestAnimationFrame(() => {
+            this.el.style.opacity = "1";
+          });
+        } catch (e) {
+          error('Init error', e)
+          if (this.renderer && this.renderer.domElement) {
+            this.el.removeChild(this.renderer.domElement)
+          }
+          return
+        }
+      }
     };
 
     let observer = new IntersectionObserver(intersectionCallback, { threshold: intersectionThreshold });
-    let target = document.getElementById('vanta-canvas');
-    observer.observe(target);
 
-    try {
-      this.init()
-    } catch (e) {
-      error('Init error', e)
-      if (this.renderer && this.renderer.domElement) {
-        this.el.removeChild(this.renderer.domElement)
-      }
-      return
-    }
 
-    this.options.color = new THREE.Color(this.options.color)
-    this.options.backgroundColor = new THREE.Color(this.options.backgroundColor)
-    this.then = Date.now();
-    this.interval = 1000 / 16;
-    this.postInit = false
+    window.requestAnimationFrame(() => {
+      let target = document.getElementById('vanta-canvas');
+      observer.observe(target);
+    });
 
     window.addEventListener('resize', this.resize)
     window.addEventListener('scroll', scrollingListener);
-    window.requestAnimationFrame(() => this.resize(true))
-    window.requestAnimationFrame(() => this.animationLoop())
-
-    this.postInit = true;
+    window.requestAnimationFrame(() => this.resize(true));
+    window.requestAnimationFrame(() => this.animationLoop());
   }
 
   prepareEl() {

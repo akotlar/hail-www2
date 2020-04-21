@@ -162,18 +162,19 @@ class Effect extends VantaBase {
     let numConnected = 0
 
     let dist, distToMouse, lineColor, p
-
+    let affected1 = 0;
+    // let affected2 = 0;
     for (let i = 0; i < this.points.length; i++) {
       p = this.points[i]
 
       if (this.rayCaster && this.mouse.updated) {
         distToMouse = (12 - this.rayCaster.ray.distanceToPoint(p.position)) * 0.25;
-        if (distToMouse < 1) {
-          p.scale.x = p.scale.y = p.scale.z = 1;
-        } else if (distToMouse > 1.25) {
-          p.scale.x = p.scale.y = p.scale.z = 1.25;
+        if (distToMouse > 1) {
+          affected1 = 1;
+          //p.scale.x = p.scale.y = p.scale.z = 2;
         } else {
-          p.scale.x = p.scale.y = p.scale.z = distToMouse;
+          affected1 = 0;
+          // p.scale.x = p.scale.y = p.scale.z = distToMouse;
         }
       }
 
@@ -186,6 +187,9 @@ class Effect extends VantaBase {
       }
 
       for (let j = i; j < this.points.length; j++) {
+        if (affected1) {
+          console.info("affected");
+        }
         const p2 = this.points[j]
         const dx = p.position.x - p2.position.x
         const dy = p.position.y - p2.position.y
