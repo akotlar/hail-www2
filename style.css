@@ -539,7 +539,7 @@ img.rounded-image {
 }
 
 #logo-title {
-  font-size: 3.75rem;
+  font-size: 3.85rem;
   color: #2a3a8c;
   animation: ease-in 0.25s in;
   animation-fill-mode: forwards;
@@ -548,7 +548,7 @@ img.rounded-image {
   font-weight: 500;
   line-height: 1.1;
   padding-bottom: 1.875rem; /*30px at 16px html*/
-  max-width: 38.5rem;
+  max-width: 39rem;
 }
 
 #logo-subtitle {

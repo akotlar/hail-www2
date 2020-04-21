@@ -143,6 +143,12 @@
   text-decoration: none;
 }
 
+
+#hail-menu a.img-link:hover, #hail-menu a.img-link.active {
+  color: #2a388f;
+  border-bottom: none;
+}
+
 #hail-navbar .dropdown-menu>li>a:hover, #hail-navbar .dropdown-menu>li>a:focus {
   color: #262626;
   background-color: #fff;
