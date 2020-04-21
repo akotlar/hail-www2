@@ -79,7 +79,7 @@ VANTA.VantaBase = class VantaBase {
     })
 
     this.postInit = false
-    const intersectionThreshold = 0.25;
+    const intersectionThreshold = 0.5;
     const intersectionCallback = (entries) => {
       if (entries.length > 1) {
         console.error("should be observing a single element");

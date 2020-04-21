@@ -42,6 +42,8 @@ class Effect extends VantaBase {
         timeout = null;
       }, 4)
     }, false);
+
+    this.highlightColor = new THREE.Color('purple');
   }
 
   // TODO: need to dot his r elative t o t he #hero container
@@ -69,7 +71,7 @@ class Effect extends VantaBase {
       this.mouse.x = x;
       this.mouse.y = y;
       this.mouse.updated = true;
-      this.mouse.updatedCount = -1;
+      this.mouse.updatedCount = 0;
 
       this.rayCaster.setFromCamera(new THREE.Vector2(this.mouse.x, this.mouse.y), this.camera);
     }
@@ -84,8 +86,8 @@ class Effect extends VantaBase {
       const material = new THREE.MeshLambertMaterial({
         color: this.options.color,
         // blending: THREE.AdditiveBlending,
-        // transparent: true,
-        // opacity: .125
+        transparent: true,
+        opacity: .2
       });
       sphere = new THREE.Mesh(geometry, material);
       sphere.renderOrder = 1;
@@ -123,7 +125,7 @@ class Effect extends VantaBase {
       // blending: THREE.AdditiveBlending,
       transparent: true,
       alphaTest: .1,
-      // opacity: .125
+      opacity: .2
     })
 
     this.linesMesh = new THREE.LineSegments(geometry, material)
@@ -171,10 +173,15 @@ class Effect extends VantaBase {
         distToMouse = (12 - this.rayCaster.ray.distanceToPoint(p.position)) * 0.25;
         if (distToMouse > 1) {
           affected1 = 1;
-          //p.scale.x = p.scale.y = p.scale.z = 2;
+          // if (distToMouse > 1.5) {
+          //   p.scale.x = p.scale.y = p.scale.z = 2;
+          // } else {
+          //   p.scale.x = p.scale.y = p.scale.z = distToMouse;
+          // }
         } else {
           affected1 = 0;
           // p.scale.x = p.scale.y = p.scale.z = distToMouse;
+          // p.scale.x = p.scale.y = p.scale.z = 1;
         }
       }
 
@@ -187,9 +194,7 @@ class Effect extends VantaBase {
       }
 
       for (let j = i; j < this.points.length; j++) {
-        if (affected1) {
-          console.info("affected");
-        }
+
         const p2 = this.points[j]
         const dx = p.position.x - p2.position.x
         const dy = p.position.y - p2.position.y
@@ -197,17 +202,23 @@ class Effect extends VantaBase {
         dist = Math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
         if (dist < this.options.maxDistance) {
 
-          let alpha = ((1.0 - (dist / this.options.maxDistance)) * 2);
-          if (alpha < 0) {
-            alpha = 0
-          } else if (alpha > 1) {
-            alpha = 1;
-          }
+          
 
-          if (this.blending === 'additive') {
-            lineColor = this.cachedColor.clone().lerp(this.diffColor, alpha)
+          if (affected1) {
+            lineColor = this.highlightColor;
           } else {
-            lineColor = this.options.backgroundColor.clone().lerp(this.options.color, alpha)
+            let alpha = ((1.0 - (dist / this.options.maxDistance)) * 2);
+            if (alpha < 0) {
+              alpha = 0
+            } else if (alpha > 1) {
+              alpha = 1;
+            }
+
+            if (this.blending === 'additive') {
+              lineColor = this.cachedColor.clone().lerp(this.diffColor, alpha)
+            } else {
+              lineColor = this.options.backgroundColor.clone().lerp(this.options.color, alpha)
+            }
           }
           // if @blending == 'subtractive'
           //   lineColor = new THREE.Color(0x000000).lerp(diffColor, alpha)
@@ -218,6 +229,7 @@ class Effect extends VantaBase {
           this.linePositions[vertexpos++] = p2.position.x
           this.linePositions[vertexpos++] = p2.position.y
           this.linePositions[vertexpos++] = p2.position.z
+
 
           this.lineColors[colorpos++] = lineColor.r
           this.lineColors[colorpos++] = lineColor.g
@@ -230,15 +242,13 @@ class Effect extends VantaBase {
         }
       }
     }
-    // this.mouse.updated = false;
-    if (this.mouse.updated || this.mouse.updatedCount >= 0) {
-      this.mouse.updatedCount += 1;
-      if (this.mouse.updatedCount % 72 == 0) {
-        this.mouse.updated = true;
-      } else {
-        this.mouse.updated = false;
-      }
-    }
+    
+    // if (this.mouse.updated) {
+    //   this.mouse.updatedCount += 1;
+    //   if (this.mouse.updatedCount > 16) {
+    //     this.mouse.updated = false;
+    //   }
+    // }
 
     this.linesMesh.geometry.setDrawRange(0, numConnected * 2)
     this.linesMesh.geometry.attributes.position.needsUpdate = true

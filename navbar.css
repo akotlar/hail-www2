@@ -20,7 +20,7 @@
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 
 #hail-navbar {
-  padding: 0px 13px;
+  padding: 10px 15px;
   margin: 0px;
   background-color: #fff;
   height: 50px;
@@ -128,7 +128,7 @@
 }
 
 #hail-navbar img#logo {
-  height: 20px;
+  height: 30px;
   border: 0;
 }
 
