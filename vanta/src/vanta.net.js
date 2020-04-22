@@ -40,15 +40,54 @@ class Effect extends VantaBase {
       timeout = setTimeout(() => {
         this.onMouseMove2(e)
         timeout = null;
-      }, 4)
+      }, this.mouse.dontshow ? 32 : 4);
     }, false);
 
     this.highlightColor = new THREE.Color('purple');
+    this.mouse.dontshow = false;
+    const d = document.getElementById('hero-content');
+    const n = document.getElementById('hail-navbar');
+
+    d.onmouseover = () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      this.mouse.updated = false;
+      this.mouse.updatedCount = 0;
+      this.mouse.dontshow = true;
+    }
+
+    d.onmouseout = () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      this.mouse.updated = true;
+      this.mouse.updatedCount = 0;
+      this.mouse.dontshow = false;
+    }
+
+    n.onmouseover = () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      this.mouse.updated = false;
+      this.mouse.updatedCount = 0;
+      this.mouse.dontshow = true;
+    }
+
+    n.onmouseout = () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      this.mouse.updated = true;
+      this.mouse.updatedCount = 0;
+      this.mouse.dontshow = false;
+    }
   }
 
   // TODO: need to dot his r elative t o t he #hero container
   onMouseMove2(e) {
-    if (!this.elOnscreen) {
+    if (!this.elOnscreen || this.mouse.dontshow) {
       return;
     }
 
@@ -116,9 +155,9 @@ class Effect extends VantaBase {
     this.lineColors = new Float32Array(numPoints * numPoints * 3)
 
     const geometry = new THREE.BufferGeometry()
-    geometry.setAttribute('position', new THREE.BufferAttribute(this.linePositions, 3).setUsage(THREE.DynamicDrawUsage))
-    geometry.setAttribute('color', new THREE.BufferAttribute(this.lineColors, 3).setUsage(THREE.DynamicDrawUsage))
-    // geometry.computeBoundingSphere()
+    geometry.setAttribute('position', new THREE.BufferAttribute(this.linePositions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(this.lineColors, 3));
+    geometry.computeBoundingSphere()
     geometry.setDrawRange(0, 0)
     const material = new THREE.LineBasicMaterial({
       vertexColors: THREE.VertexColors,
@@ -169,20 +208,21 @@ class Effect extends VantaBase {
     for (let i = 0; i < this.points.length; i++) {
       p = this.points[i]
 
-      if (this.rayCaster && this.mouse.updated) {
-        distToMouse = (12 - this.rayCaster.ray.distanceToPoint(p.position)) * 0.25;
-        if (distToMouse > 1) {
-          affected1 = 1;
-          // if (distToMouse > 1.5) {
-          //   p.scale.x = p.scale.y = p.scale.z = 2;
-          // } else {
-          //   p.scale.x = p.scale.y = p.scale.z = distToMouse;
-          // }
-        } else {
-          affected1 = 0;
-          // p.scale.x = p.scale.y = p.scale.z = distToMouse;
-          // p.scale.x = p.scale.y = p.scale.z = 1;
+      if (this.rayCaster) {
+        if (this.mouse.updated) {
+          distToMouse = (12 - this.rayCaster.ray.distanceToPoint(p.position)) * 0.25;
+          if (distToMouse > 1) {
+            affected1 = 1;
+            p.material.color = this.highlightColor;
+          } else {
+            affected1 = 0;
+            p.material.color = this.options.color;
+          }
         }
+        else if (p.material.color !== this.options.color) {
+          p.material.color = this.options.color;
+        }
+
       }
 
       if (p.r !== 0) {
@@ -201,13 +241,10 @@ class Effect extends VantaBase {
         const dz = p.position.z - p2.position.z
         dist = Math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
         if (dist < this.options.maxDistance) {
-
-          
-
           if (affected1) {
             lineColor = this.highlightColor;
           } else {
-            let alpha = ((1.0 - (dist / this.options.maxDistance)) * 2);
+            let alpha = ((1.0 - (dist / this.options.maxDistance)));
             if (alpha < 0) {
               alpha = 0
             } else if (alpha > 1) {
@@ -220,9 +257,6 @@ class Effect extends VantaBase {
               lineColor = this.options.backgroundColor.clone().lerp(this.options.color, alpha)
             }
           }
-          // if @blending == 'subtractive'
-          //   lineColor = new THREE.Color(0x000000).lerp(diffColor, alpha)
-
           this.linePositions[vertexpos++] = p.position.x
           this.linePositions[vertexpos++] = p.position.y
           this.linePositions[vertexpos++] = p.position.z
@@ -242,7 +276,7 @@ class Effect extends VantaBase {
         }
       }
     }
-    
+
     // if (this.mouse.updated) {
     //   this.mouse.updatedCount += 1;
     //   if (this.mouse.updatedCount > 16) {
