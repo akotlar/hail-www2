@@ -1,36 +1,126 @@
 /*Modified by Alex Kotlar 2020*/
-
-import VantaBase, { VANTA } from './_base.js'
 import { rn, ri, getBrightness } from './helpers.js'
 
-const win = typeof window == 'object'
-let THREE = win && window.THREE
+class Viz {
+  constructor(userOptions = {}) {
+    if (!THREE.WebGLRenderer) {
+      console.warn("[VANTA] No THREE defined on window")
+      return
+    }
 
-class Effect extends VantaBase {
-  static initClass() {
-    this.prototype.defaultOptions = {
+    this.options = Object.assign({
+      scale: 1,
+      scaleMobile: 1,
       color: 0xff3f81,
       backgroundColor: 0xfffffff,
       points: 10,
       maxDistance: 20,
       spacing: 15,
       showDots: true
+    }, userOptions);
+
+    this.el = document.querySelector(this.options.el);
+
+    if (!this.el) {
+      console.error(`Cannot find ${this.options.el}`)
+      return;
     }
-    this.prototype.mouse = { "x": 0, "y": 0, "rawY": 0, "updated": false, "updatedCount": -1, "ran": false };
-  }
 
-  constructor(userOptions) {
-    THREE = userOptions.THREE || THREE
-    super(userOptions)
+    this.mouse = { "x": 0, "y": 0, "rawY": 0, "updated": false, "updatedCount": -1, "ran": false };
 
+    this.highlightColor = new THREE.Color('purple');
     this.cachedColor = new THREE.Color(0x000000);
-    this.cachedZeroVector = new THREE.Vector3(0, 0, 0);
+    this.options.color = new THREE.Color(this.options.color)
+    this.options.backgroundColor = new THREE.Color(this.options.backgroundColor)
     this.diffColor = this.options.color.clone().sub(this.options.backgroundColor);
     this.colorB = getBrightness(new THREE.Color(this.options.color))
     this.bgB = getBrightness(new THREE.Color(this.options.backgroundColor));
-
+  
     this.elOffset = this.el.offsetTop;
-    console.info('this.elOffset', this.elOffset);
+    this.elOnscreen = false;
+    this.isScrolling = false;
+    this.resizeTimeout = null;
+    this.postInit = false
+
+    this.animationLoop = this.animationLoop.bind(this)
+
+    window.requestAnimationFrame(() => {
+      this.renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true
+      })
+
+      this.el.appendChild(this.renderer.domElement)
+
+      Object.assign(this.renderer.domElement.style, {
+        position: 'absolute',
+        zIndex: 0,
+        top: 0,
+        left: 0,
+        background: ''
+      });
+
+      this.renderer.domElement.id = 'viz-canvas';
+    });
+
+    window.requestAnimationFrame(() => {
+      this.scene = new THREE.Scene()
+      this.elOnscreen = true;
+    })
+    
+    const intersectionThreshold = 0.6;
+    const intersectionCallback = (entries) => {
+      if (entries.length > 1) {
+        console.error("should be observing a single element");
+      }
+
+      // entries[0].isIntersecting incorrect in firefox
+      this.elOnscreen = entries[0].intersectionRatio > intersectionThreshold;
+      this.interval = 1000 / 16;
+      if (this.elOnscreen && this.postInit == false) {
+        try {
+          window.requestAnimationFrame(() => {
+            this.init();
+            this.postInit = true;
+            this.then = Date.now();
+            this.listen();
+          });
+
+          window.requestAnimationFrame(() => {
+            this.el.style.opacity = "1";
+          });
+        } catch (e) {
+          console.error('Init error', e)
+          if (this.renderer && this.renderer.domElement) {
+            this.el.removeChild(this.renderer.domElement)
+          }
+          return
+        }
+      }
+    };
+
+    let observer = new IntersectionObserver(intersectionCallback, { threshold: intersectionThreshold });
+
+    window.requestAnimationFrame(() => observer.observe(this.renderer.domElement));
+    window.requestAnimationFrame(() => this.resize(true));
+    window.requestAnimationFrame(this.animationLoop);
+  }
+
+  listen() {
+    this.elOffset = this.el.offsetTop;
+
+    this.isScrolling = false;
+    this.resizeTimeout = null;
+
+    window.addEventListener('resize', (e) => this.resize(e))
+    window.addEventListener('scroll', () => {
+      if (this.isScrolling) {
+        window.clearTimeout(this.isScrolling);
+      }
+
+      this.isScrolling = setTimeout(() => this.isScrolling = null, 100);
+    });
+
     let timeout;
     window.addEventListener('mousemove', (e) => {
       if (timeout) {
@@ -43,7 +133,6 @@ class Effect extends VantaBase {
       }, this.mouse.dontshow ? 32 : 4);
     }, false);
 
-    this.highlightColor = new THREE.Color('purple');
     this.mouse.dontshow = false;
     const d = document.getElementById('hero-content');
     const n = document.getElementById('hail-navbar');
@@ -85,7 +174,49 @@ class Effect extends VantaBase {
     }
   }
 
-  // TODO: need to dot his r elative t o t he #hero container
+  resize(e) {
+    if(this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+    }
+    this.resizeTimeout = setTimeout( () => {
+      if (this.camera) {
+        this.camera.aspect = this.el.offsetWidth / this.el.offsetHeight
+        if (typeof this.camera.updateProjectionMatrix === "function") {
+          this.camera.updateProjectionMatrix()
+        }
+      }
+      if (this.renderer) {
+        this.renderer.setSize(this.el.offsetWidth, this.el.offsetHeight)
+        this.renderer.setPixelRatio(window.devicePixelRatio)
+      }
+
+      this.resizeTimeout = null;
+    }, this.postInit ? 100: 0);
+  }
+
+  animationLoop() {
+    const now = Date.now();
+    const delta = now - this.then;
+
+    if (this.elOnscreen && (!this.isScrolling || !this.postInit)) {
+      if (delta > this.interval) {
+        if (typeof this.onUpdate === "function") {
+          this.onUpdate()
+        }
+        if (this.scene && this.camera) {
+          this.renderer.render(this.scene, this.camera)
+          this.renderer.setClearColor(this.options.backgroundColor, this.options.backgroundAlpha)
+        }
+        if (this.fps && this.fps.update) this.fps.update()
+        if (typeof this.afterRender === "function") this.afterRender()
+      }
+    }
+
+    this.then = now - (delta % this.interval);
+    return this.req = window.setTimeout(this.animationLoop, !this.elOnscreen ? 1000 : (this.postInit ? 24 : 0))
+  }
+
+
   onMouseMove2(e) {
     if (!this.elOnscreen || this.mouse.dontshow) {
       return;
@@ -145,6 +276,7 @@ class Effect extends VantaBase {
   init() {
     this.cont = new THREE.Group()
     this.cont.position.set(0, 0, 0)
+    this.scene = new THREE.Scene();
     this.scene.add(this.cont)
 
     let n = this.options.points
@@ -187,7 +319,9 @@ class Effect extends VantaBase {
     this.camera = new THREE.PerspectiveCamera(
       25,
       this.el.offsetWidth / (this.el.offsetHeight),
-      .01, 10000)
+      .01, 10000);
+
+    console.info("camera", this.camera)
     this.camera.position.set(50, 100, 150)
     this.scene.add(this.camera)
 
@@ -195,7 +329,6 @@ class Effect extends VantaBase {
     this.scene.add(ambience);
     this.camera.lookAt(0, 0, 0);
   }
-
 
   onUpdate() {
     let vertexpos = 0
@@ -236,10 +369,7 @@ class Effect extends VantaBase {
       for (let j = i; j < this.points.length; j++) {
 
         const p2 = this.points[j]
-        const dx = p.position.x - p2.position.x
-        const dy = p.position.y - p2.position.y
-        const dz = p.position.z - p2.position.z
-        dist = Math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
+        dist = Math.sqrt(((p.position.x - p2.position.x) ** 2) + ((p.position.y - p2.position.y) ** 2) + ((p.position.z - p2.position.z) ** 2))
         if (dist < this.options.maxDistance) {
           if (affected1) {
             lineColor = this.highlightColor;
@@ -277,18 +407,10 @@ class Effect extends VantaBase {
       }
     }
 
-    // if (this.mouse.updated) {
-    //   this.mouse.updatedCount += 1;
-    //   if (this.mouse.updatedCount > 16) {
-    //     this.mouse.updated = false;
-    //   }
-    // }
-
     this.linesMesh.geometry.setDrawRange(0, numConnected * 2)
     this.linesMesh.geometry.attributes.position.needsUpdate = true
     this.linesMesh.geometry.attributes.color.needsUpdate = true
   }
 }
-Effect.initClass()
 
-export default VANTA.register('NET', Effect)
+export default Viz;
