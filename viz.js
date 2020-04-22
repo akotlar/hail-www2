@@ -1,5 +1,5 @@
 /*Modified by Alex Kotlar 2020*/
-import { rn, ri, getBrightness } from './helpers.js'
+import { rn, ri, getBrightness } from './vanta/src/helpers.js';
 
 class Viz {
   constructor(userOptions = {}) {
@@ -321,7 +321,6 @@ class Viz {
       this.el.offsetWidth / (this.el.offsetHeight),
       .01, 10000);
 
-    console.info("camera", this.camera)
     this.camera.position.set(50, 100, 150)
     this.scene.add(this.camera)
 
