@@ -11,7 +11,7 @@ function getBrightness(threeColor) {
   return (0.299 * threeColor.r) + (0.587 * threeColor.g) + (0.114 * threeColor.b);
 }
 
-/*pruned/extended _base.js + vanta.net.js, focused on performance improvement, drops cpu usage by 75%, reduces memory usage*/
+/*pruned/extended _base.js + vanta.net.js, focused on performance improvement, drops cpu usage by 75%, reduces memory usage, and introduces hover effects*/
 class Viz {
   constructor(userOptions = {}) {
     if (!THREE.WebGLRenderer) {
@@ -31,7 +31,6 @@ class Viz {
     }, userOptions);
 
     this.el = document.querySelector(this.options.el);
-
     if (!this.el) {
       console.error(`Cannot find ${this.options.el}`);
       return;
@@ -69,11 +68,6 @@ class Viz {
       this.el.appendChild(this.renderer.domElement);
     });
 
-    window.requestAnimationFrame(() => {
-      this.scene = new THREE.Scene()
-      this.elOnscreen = true;
-    })
-
     const intersectionThreshold = 0.6;
     const intersectionCallback = (entries) => {
       if (entries.length > 1) {
@@ -93,9 +87,9 @@ class Viz {
             this.listen();
           });
 
-          window.requestAnimationFrame(() => {
-            this.el.style.opacity = "1";
-          });
+          window.requestAnimationFrame(() => this.resize(true));
+          window.requestAnimationFrame(() => this.el.style.opacity = "1");
+          window.requestAnimationFrame(this.animationLoop);
         } catch (e) {
           if (this.renderer && this.renderer.domElement) {
             this.el.removeChild(this.renderer.domElement)
@@ -108,8 +102,7 @@ class Viz {
     let observer = new IntersectionObserver(intersectionCallback, { threshold: intersectionThreshold });
 
     window.requestAnimationFrame(() => observer.observe(this.renderer.domElement));
-    window.requestAnimationFrame(() => this.resize(true));
-    window.requestAnimationFrame(this.animationLoop);
+
   }
 
   listen() {

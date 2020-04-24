@@ -190,10 +190,9 @@
     }
   });
 </script>
-<script src="/threeR115.min.js"></script>
+<script src="/vanta/threeR115.min.js"></script>
 <script type="module">
-  import Viz from "/viz.js";
-  console.info("Viz", Viz);
+  import Viz from "/vanta/viz.js";
   let isScrolling;
 
   let initialized = null;
@@ -208,7 +207,6 @@
       if (initialized) {
         window.removeEventListener("scroll", scrollingListener);
         window.clearTimeout(isScrolling);
-        console.info("removed");
         return;
       }
 
