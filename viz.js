@@ -1,11 +1,22 @@
-/*Modified by Alex Kotlar 2020*/
-import { rn, ri, getBrightness } from './vanta/src/helpers.js';
+/*Modified from VantaJS, by Alex Kotlar 2020*/
 
+/* from helpers.js*/
+function ri(start, end) {
+  if (start == null) start = 0;
+  if (end == null) end = 1;
+  return Math.floor(start + (Math.random() * ((end - start) + 1)));
+}
+
+function getBrightness(threeColor) {
+  return (0.299 * threeColor.r) + (0.587 * threeColor.g) + (0.114 * threeColor.b);
+}
+
+/*pruned/extended _base.js + vanta.net.js, focused on performance improvement, drops cpu usage by 75%, reduces memory usage*/
 class Viz {
   constructor(userOptions = {}) {
     if (!THREE.WebGLRenderer) {
-      console.warn("[VANTA] No THREE defined on window")
-      return
+      console.error("ThreeJS has not been loaded, or WebGL is unsupported");
+      return;
     }
 
     this.options = Object.assign({
@@ -22,56 +33,51 @@ class Viz {
     this.el = document.querySelector(this.options.el);
 
     if (!this.el) {
-      console.error(`Cannot find ${this.options.el}`)
+      console.error(`Cannot find ${this.options.el}`);
       return;
+    }
+
+    if (!this.el.style.position == 'absolute') {
+      this.el.style.position = 'absolute';
     }
 
     this.mouse = { "x": 0, "y": 0, "rawY": 0, "updated": false, "updatedCount": -1, "ran": false };
 
     this.highlightColor = new THREE.Color('purple');
     this.cachedColor = new THREE.Color(0x000000);
-    this.options.color = new THREE.Color(this.options.color)
-    this.options.backgroundColor = new THREE.Color(this.options.backgroundColor)
+    this.options.color = new THREE.Color(this.options.color);
+    this.options.backgroundColor = new THREE.Color(this.options.backgroundColor);
     this.diffColor = this.options.color.clone().sub(this.options.backgroundColor);
-    this.colorB = getBrightness(new THREE.Color(this.options.color))
+    this.colorB = getBrightness(new THREE.Color(this.options.color));
     this.bgB = getBrightness(new THREE.Color(this.options.backgroundColor));
-  
+
     this.elOffset = this.el.offsetTop;
     this.elOnscreen = false;
     this.isScrolling = false;
     this.resizeTimeout = null;
-    this.postInit = false
+    this.postInit = false;
+    this.points = [];
 
-    this.animationLoop = this.animationLoop.bind(this)
+    this.animationLoop = this.animationLoop.bind(this);
 
     window.requestAnimationFrame(() => {
       this.renderer = new THREE.WebGLRenderer({
         alpha: true,
-        antialias: true
-      })
-
-      this.el.appendChild(this.renderer.domElement)
-
-      Object.assign(this.renderer.domElement.style, {
-        position: 'absolute',
-        zIndex: 0,
-        top: 0,
-        left: 0,
-        background: ''
+        antialias: true,
       });
 
-      this.renderer.domElement.id = 'viz-canvas';
+      this.el.appendChild(this.renderer.domElement);
     });
 
     window.requestAnimationFrame(() => {
       this.scene = new THREE.Scene()
       this.elOnscreen = true;
     })
-    
+
     const intersectionThreshold = 0.6;
     const intersectionCallback = (entries) => {
       if (entries.length > 1) {
-        console.error("should be observing a single element");
+        console.warn("should be observing a single element, ignoring all but first");
       }
 
       // entries[0].isIntersecting incorrect in firefox
@@ -83,6 +89,7 @@ class Viz {
             this.init();
             this.postInit = true;
             this.then = Date.now();
+
             this.listen();
           });
 
@@ -90,7 +97,6 @@ class Viz {
             this.el.style.opacity = "1";
           });
         } catch (e) {
-          console.error('Init error', e)
           if (this.renderer && this.renderer.domElement) {
             this.el.removeChild(this.renderer.domElement)
           }
@@ -112,7 +118,7 @@ class Viz {
     this.isScrolling = false;
     this.resizeTimeout = null;
 
-    window.addEventListener('resize', (e) => this.resize(e))
+    window.addEventListener('resize', (e) => this.resize(e));
     window.addEventListener('scroll', () => {
       if (this.isScrolling) {
         window.clearTimeout(this.isScrolling);
@@ -175,12 +181,12 @@ class Viz {
   }
 
   resize(e) {
-    if(this.resizeTimeout) {
+    if (this.resizeTimeout) {
       clearTimeout(this.resizeTimeout);
     }
-    this.resizeTimeout = setTimeout( () => {
+    this.resizeTimeout = setTimeout(() => {
       if (this.camera) {
-        this.camera.aspect = this.el.offsetWidth / this.el.offsetHeight
+        this.camera.aspect = this.el.offsetWidth / this.el.offsetHeight;
         if (typeof this.camera.updateProjectionMatrix === "function") {
           this.camera.updateProjectionMatrix()
         }
@@ -191,7 +197,7 @@ class Viz {
       }
 
       this.resizeTimeout = null;
-    }, this.postInit ? 100: 0);
+    }, this.postInit ? 100 : 0);
   }
 
   animationLoop() {
@@ -248,97 +254,81 @@ class Viz {
   }
 
   genPoint(x, y, z) {
-    let sphere;
-    if (!this.points) { this.points = []; }
-
-    if (this.options.showDots) {
-      const geometry = new THREE.SphereGeometry(0.25, 12, 12); // radius, width, height
-      const material = new THREE.MeshLambertMaterial({
-        color: this.options.color,
-        // blending: THREE.AdditiveBlending,
-        transparent: true,
-        opacity: .2
-      });
-      sphere = new THREE.Mesh(geometry, material);
-      sphere.renderOrder = 1;
-    } else {
-      sphere = new THREE.Object3D();
-    }
-    this.cont.add(sphere);
-    sphere.ox = x;
-    sphere.oy = y;
-    sphere.oz = z;
+    const geometry = new THREE.SphereGeometry(0.25, 12, 12);
+    const material = new THREE.MeshLambertMaterial({
+      color: this.options.color,
+      // blending: THREE.AdditiveBlending,
+      transparent: true,
+      opacity: .2
+    });
+    const sphere = new THREE.Mesh(geometry, material);
     sphere.position.set(x, y, z);
-    sphere.r = rn(-2, 2); // rotation rate
-    return this.points.push(sphere);
+    sphere.r = 0.00025 * ((Math.random() * 4) - 2); // rotation rate, larger is faster
+    return sphere;
   }
 
   init() {
-    this.cont = new THREE.Group()
-    this.cont.position.set(0, 0, 0)
-    this.scene = new THREE.Scene();
-    this.scene.add(this.cont)
+    const group = new THREE.Group();
+    group.position.set(0, 0, 0);
 
-    let n = this.options.points
-    let { spacing } = this.options
+    let { points, spacing } = this.options;
 
-    const numPoints = n * n * 2;
-    this.linePositions = new Float32Array(numPoints * numPoints * 3)
-    this.lineColors = new Float32Array(numPoints * numPoints * 3)
+    const numPoints = points * points * 2;
+    this.linePositions = new Float32Array(numPoints * numPoints * 3);
+    this.lineColors = new Float32Array(numPoints * numPoints * 3);
 
-    const geometry = new THREE.BufferGeometry()
+    const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(this.linePositions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(this.lineColors, 3));
-    geometry.computeBoundingSphere()
-    geometry.setDrawRange(0, 0)
+    geometry.computeBoundingSphere();
+    geometry.setDrawRange(0, 0);
     const material = new THREE.LineBasicMaterial({
       vertexColors: THREE.VertexColors,
       // blending: THREE.AdditiveBlending,
       transparent: true,
       alphaTest: .1,
       opacity: .2
-    })
+    });
 
     this.linesMesh = new THREE.LineSegments(geometry, material)
     this.linesMesh.renderOrder = 2;
-    this.cont.add(this.linesMesh)
+    group.add(this.linesMesh);
 
-    for (let i = 0; i <= n; i++) {
-      for (let j = 0; j <= n; j++) {
+    for (let i = 0; i <= points; i++) {
+      for (let j = 0; j <= points; j++) {
         const y = ri(-3, 3)
-        const x = ((i - (n / 2)) * spacing) + ri(-5, 5)
-        let z = ((j - (n / 2)) * spacing) + ri(-5, 5)
-        if (i % 2) { z += spacing * 0.5 } // offset
+        const x = ((i - (points / 2)) * spacing) + ri(-5, 5);
+        let z = ((j - (points / 2)) * spacing) + ri(-5, 5);
+        if (i % 2) { z += spacing * 0.5 };
 
-        this.genPoint(x, y - ri(5, 15), z)
-        this.genPoint(x + ri(-5, 5), y + ri(5, 15), z + ri(-5, 5))
+        const p1 = this.genPoint(x, y - ri(5, 15), z);
+        const p2 = this.genPoint(x + ri(-5, 5), y + ri(5, 15), z + ri(-5, 5));
+        group.add(p1, p2);
+        this.points.push(p1, p2);
       }
     }
 
-    // PerspectiveCamera( fov, aspect, near, far )
-    this.camera = new THREE.PerspectiveCamera(
-      25,
-      this.el.offsetWidth / (this.el.offsetHeight),
-      .01, 10000);
+    const ambience = new THREE.AmbientLight(0xffffff, 0.75);
+    this.camera = new THREE.PerspectiveCamera(25, this.el.offsetWidth / (this.el.offsetHeight), .01, 10000);
 
-    this.camera.position.set(50, 100, 150)
-    this.scene.add(this.camera)
-
-    const ambience = new THREE.AmbientLight(0xffffff, 0.75)
-    this.scene.add(ambience);
+    this.camera.position.set(50, 100, 150);
     this.camera.lookAt(0, 0, 0);
+
+    this.scene = new THREE.Scene();
+    this.scene.add(this.camera)
+    this.scene.add(ambience);
+    this.scene.add(group);
   }
 
   onUpdate() {
-    let vertexpos = 0
-    let colorpos = 0
-    let numConnected = 0
+    let vertexpos = 0;
+    let colorpos = 0;
+    let numConnected = 0;
 
-    let dist, distToMouse, lineColor, p
+    let dist, distToMouse, lineColor, p, p2, ang;
     let affected1 = 0;
-    // let affected2 = 0;
     for (let i = 0; i < this.points.length; i++) {
-      p = this.points[i]
+      p = this.points[i];
 
       if (this.rayCaster) {
         if (this.mouse.updated) {
@@ -354,20 +344,17 @@ class Viz {
         else if (p.material.color !== this.options.color) {
           p.material.color = this.options.color;
         }
-
       }
 
       if (p.r !== 0) {
-        let ang = Math.atan2(p.position.z, p.position.x)
-        dist = Math.sqrt((p.position.z * p.position.z) + (p.position.x * p.position.x))
-        ang += 0.00025 * p.r
-        p.position.x = dist * Math.cos(ang)
-        p.position.z = dist * Math.sin(ang)
+        ang = Math.atan2(p.position.z, p.position.x) + p.r;
+        dist = Math.sqrt((p.position.z ** 2) + (p.position.x ** 2));
+        p.position.x = dist * Math.cos(ang);
+        p.position.z = dist * Math.sin(ang);
       }
 
       for (let j = i; j < this.points.length; j++) {
-
-        const p2 = this.points[j]
+        p2 = this.points[j]
         dist = Math.sqrt(((p.position.x - p2.position.x) ** 2) + ((p.position.y - p2.position.y) ** 2) + ((p.position.z - p2.position.z) ** 2))
         if (dist < this.options.maxDistance) {
           if (affected1) {
@@ -375,40 +362,36 @@ class Viz {
           } else {
             let alpha = ((1.0 - (dist / this.options.maxDistance)));
             if (alpha < 0) {
-              alpha = 0
+              alpha = 0;
             } else if (alpha > 1) {
               alpha = 1;
             }
 
-            if (this.blending === 'additive') {
-              lineColor = this.cachedColor.clone().lerp(this.diffColor, alpha)
-            } else {
-              lineColor = this.options.backgroundColor.clone().lerp(this.options.color, alpha)
-            }
+            lineColor = this.options.backgroundColor.clone().lerp(this.options.color, alpha);
           }
-          this.linePositions[vertexpos++] = p.position.x
-          this.linePositions[vertexpos++] = p.position.y
-          this.linePositions[vertexpos++] = p.position.z
-          this.linePositions[vertexpos++] = p2.position.x
-          this.linePositions[vertexpos++] = p2.position.y
-          this.linePositions[vertexpos++] = p2.position.z
+          this.linePositions[vertexpos++] = p.position.x;
+          this.linePositions[vertexpos++] = p.position.y;
+          this.linePositions[vertexpos++] = p.position.z;
+          this.linePositions[vertexpos++] = p2.position.x;
+          this.linePositions[vertexpos++] = p2.position.y;
+          this.linePositions[vertexpos++] = p2.position.z;
 
 
-          this.lineColors[colorpos++] = lineColor.r
-          this.lineColors[colorpos++] = lineColor.g
-          this.lineColors[colorpos++] = lineColor.b
-          this.lineColors[colorpos++] = lineColor.r
-          this.lineColors[colorpos++] = lineColor.g
-          this.lineColors[colorpos++] = lineColor.b
+          this.lineColors[colorpos++] = lineColor.r;
+          this.lineColors[colorpos++] = lineColor.g;
+          this.lineColors[colorpos++] = lineColor.b;
+          this.lineColors[colorpos++] = lineColor.r;
+          this.lineColors[colorpos++] = lineColor.g;
+          this.lineColors[colorpos++] = lineColor.b;
 
-          numConnected++
+          numConnected++;
         }
       }
     }
 
-    this.linesMesh.geometry.setDrawRange(0, numConnected * 2)
-    this.linesMesh.geometry.attributes.position.needsUpdate = true
-    this.linesMesh.geometry.attributes.color.needsUpdate = true
+    this.linesMesh.geometry.setDrawRange(0, numConnected * 2);
+    this.linesMesh.geometry.attributes.position.needsUpdate = true;
+    this.linesMesh.geometry.attributes.color.needsUpdate = true;
   }
 }
 
